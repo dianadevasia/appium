@@ -66,6 +66,11 @@ public class appiumTest {
         searchTextView.sendKeys( "samsung galaxy s8 \n" );
 
         driver.findElement( By.id( "com.amazon.mShop.android.shopping:id/rs_results_image" ) ).click();
+
+        final WebElement addToCart = driver.findElement( By.id( "add-to-cart-button[@text='Add to Basket']" ) );
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript( "arguments[0].scrollIntoView(true);", addToCart );
+
     }
 
     @AfterTest
