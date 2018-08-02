@@ -56,15 +56,11 @@ public class appiumTest {
     public void Sum() {
 
 //        driver.findElements(By.xpath("//android.widget.ImageView")).clear();
-        List<WebElement> loginAsButton = driver.findElements( By.xpath("//android.widget.Button"));
+        List<WebElement> loginAsButton = driver.findElements( By.xpath("//android.widget.Button[@text='Continue']"));
 
-        // Click on number 2 button.
-        loginAsButton.get(1).click();
+        loginAsButton.get(0).click();
         WebElement searchTextView = driver.findElement( By.xpath("//android.widget.EditText"));
         searchTextView.sendKeys( "samsung galaxy s8" );
-
-
-//                sendKeys( "samsung galaxy s9" );
 
         // Click on + button.
 //        calcButtons.get(16).click();
