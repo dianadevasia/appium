@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -16,6 +18,8 @@ import org.testng.annotations.Test;
 public class appiumTest {
 
     WebDriver driver;
+    WebDriverWait wait;
+    JavascriptExecutor js;
 
     @BeforeTest
     public void setUp() throws MalformedURLException {
@@ -53,30 +57,15 @@ public class appiumTest {
     }
 
     @Test
-    public void Sum() {
+    public void Sum() throws InterruptedException {
 
-//        driver.findElements(By.xpath("//android.widget.ImageView")).clear();
-        List<WebElement> loginAsButton = driver.findElements( By.xpath("//android.widget.Button[@text='Continue']"));
+        List<WebElement> loginAsButton = driver.findElements( By.xpath( "//android.widget.Button[@text='Continue']" ) );
+        loginAsButton.get( 0 ).click();
 
-        loginAsButton.get(0).click();
-        WebElement searchTextView = driver.findElement( By.xpath("//android.widget.EditText"));
-        searchTextView.sendKeys( "samsung galaxy s8" );
+        WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
+        searchTextView.sendKeys( "samsung galaxy s8 \n" );
 
-        // Click on + button.
-//        calcButtons.get(16).click();
-//
-//        // Click on number 5 button.
-//        calcButtons.get(4).click();
-//
-//        // Click on = button.
-//        calcButtons.get(11).click();
-
-//        List<WebElement> text = driver.findElements(By.xpath("//android.widget.TextView"));
-
-        // Get result from result text box.
-//        String result = text.get(1).getText();
-//        System.out.println("Number sum result is: " + result);
-
+        driver.findElement( By.id( "com.amazon.mShop.android.shopping:id/rs_results_image" ) ).click();
     }
 
     @AfterTest
