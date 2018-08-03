@@ -1,5 +1,9 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -15,6 +19,8 @@ import org.testng.annotations.Test;
 
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.remote.MobileCapabilityType;
+
 public class appiumTest {
 
     AndroidDriver driver;
@@ -24,56 +30,50 @@ public class appiumTest {
     @BeforeTest
     public void setUp() throws MalformedURLException {
 
-        // Created object of DesiredCapabilities class.
         DesiredCapabilities capabilities = new DesiredCapabilities();
 
-        // Set android deviceName desired capability. Set your device name.
         capabilities.setCapability("deviceName", "ZY2239T773");
-
-        // Set BROWSER_NAME desired capability. It's Android in our case here.
         capabilities.setCapability(CapabilityType.BROWSER_NAME, "Android");
-
-        // Set android VERSION desired capability. Set your mobile device's OS version.
         capabilities.setCapability(CapabilityType.VERSION, "7.0.1");
-
-        // Set android platformName desired capability. It's Android in our case here.
         capabilities.setCapability("platformName", "Android");
-
-        // Set android appPackage desired capability. It is
-        // com.google.android.calculator for calculator application.
-        // Set your application's appPackage if you are using any other app.
         capabilities.setCapability("appPackage", "com.amazon.mShop.android.shopping");
-
-        // Set android appActivity desired capability. It is
-        // com.android.calculator2.Calculator for calculator application.
-        // Set your application's appPackage if you are using any other app.
         capabilities.setCapability("appActivity", "com.amazon.mShop.home.HomeActivity");
+        capabilities.setCapability( MobileCapabilityType.FULL_RESET, false);
+        capabilities.setCapability( MobileCapabilityType.NO_RESET, true);
 
-        // Created object of RemoteWebDriver will all set capabilities.
-        // Set appium server address and port number in URL string.
-        // It will launch calculator app in android device.
 //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
         driver = new AndroidDriver<>(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
         driver.manage().timeouts().implicitlyWait(25, TimeUnit.SECONDS);
+//        driver.resetApp();
     }
+
 
     @Test
     public void Sum() throws Exception {
 
-        WebElement loginAsButton = driver.findElement( By.xpath( "//android.widget.Button[@text='Continue']" ) );
-        loginAsButton.click();
+        Properties prop = new Properties();
+        FileInputStream fileInput = null;
+        try {
+            fileInput = new FileInputStream(new File("datafile.properties"));
+            prop.load(fileInput);
+        } catch ( IOException e ) {
+            System.out.print( "file not found" );
+            e.printStackTrace();
+        }
+
+        final String search_keywords_0 = prop.getProperty( "search_keywords_0" );
+
+//        WebElement loginAsButton = driver.findElement( By.xpath( "//android.widget.Button[@text='Continue']" ) );
+//        loginAsButton.click();
 
         WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
-        searchTextView.sendKeys( "samsung galaxy s8 \n" );
+        searchTextView.sendKeys( search_keywords_0 + " \n" );
 
         driver.findElement( By.id( "com.amazon.mShop.android.shopping:id/rs_results_image" ) ).click();
 
         final WebElement closeButton = driver.findElement( By.id("tutorial_tool_tip_close_button") );
         closeButton.click();
-
-//        final WebElement addToCart = driver.findElement( By.id("add-to-cart-button") );
-//        addToCart.click();
-
+//
 //        while ( !isElementPresent() ){
         waitForElementToBePresent();
 //        }
@@ -110,7 +110,6 @@ public class appiumTest {
             if (direction.equals("down")) {
                 touchAction.press(x1, y1).moveTo(0, -y2).perform();
             } else if (direction.equals("up")) {
-//                LogUtils.INFO("*** SCROLLING ***");
                 touchAction.press(x2, y2).moveTo(x1, y1).release().perform();
             }
             try {
