@@ -95,7 +95,7 @@ public class appiumTest {
             swipeUpElement( 700, 530 );
             Thread.sleep( 5000 );
             webElement.click();
-            Thread.sleep( 10000 );
+            Thread.sleep( 600000 );
             System.out.print( "element found -- inside waitforElement" );
         } catch ( NoSuchElementException ex ) {
             swipeUpElement( 700, 500 );
