@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="appiumTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2018-08-04T13:34:39" hostname="Indianadev" time="34.831">
+  <properties/>
+  <testcase name="checkoutProductFlow" classname="appiumTest" time="34.831"/>
+  <system-out><![CDATA[element not found -- inside catchelement found -- inside waitforElement]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
