@@ -5,12 +5,10 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -25,8 +23,6 @@ import io.appium.java_client.remote.MobileCapabilityType;
 public class appiumTest {
 
     AndroidDriver driver;
-    WebDriverWait wait;
-    JavascriptExecutor js;
 
     @BeforeTest
     public void setUp() throws MalformedURLException {
@@ -49,16 +45,6 @@ public class appiumTest {
 
     @Test
     public void checkoutProductFlow() {
-//        Properties prop = new Properties();
-//        FileInputStream fileInput = null;
-//        try {
-//            fileInput = new FileInputStream( "datafile.properties" );
-//            prop.load( fileInput );
-//        } catch ( IOException e ) {
-//            System.out.print( "file not found" );
-//            e.printStackTrace();
-//        }
-
         PropertyFile prop;
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         try {
@@ -88,8 +74,6 @@ public class appiumTest {
                 swipeUpElement( 700, 500);
             }
             final WebElement webElement =
-//                    (WebElement) driver.findElements(By.id( id )).get( 0 );
-//                    driver.findElement(By.xpath("//android.widget.Button[@text='Add to Basket']"));
                     driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
 
             swipeUpElement( 700, 530 );
@@ -134,7 +118,6 @@ public class appiumTest {
 
     private boolean isElementPresentById( String id) {
         try {
-//            if( driver.findElements(By.xpath("//android.widget.Button[@text='Add to Basket']")).size()>0)
             if( driver.findElement(
                     By.xpath("//android.view.View[contains(@resource-id,'add-to-wishlist-button-submit') and @text='ADD TO LIST']"))
                     .isDisplayed())
