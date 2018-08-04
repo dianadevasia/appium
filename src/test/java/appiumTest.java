@@ -44,13 +44,11 @@ public class appiumTest {
 //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
         driver = new AndroidDriver<>(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
         driver.manage().timeouts().implicitlyWait(25, TimeUnit.SECONDS);
-//        driver.resetApp();
     }
 
 
     @Test
-    public void Sum() throws Exception {
-
+    public void checkoutProductFlow() {
         Properties prop = new Properties();
         FileInputStream fileInput = null;
         try {
@@ -61,11 +59,13 @@ public class appiumTest {
             e.printStackTrace();
         }
 
+        if(prop.getProperty( "clear_apk_data_on_start" ).equals( "true" ))
+            driver.resetApp();
+
+        //        WebElement loginAsButton = driver.findElement( By.xpath( "//android.widget.Button[@text='Continue']" ) );
+        //        loginAsButton.click();
+
         final String search_keywords_0 = prop.getProperty( "search_keywords_0" );
-
-//        WebElement loginAsButton = driver.findElement( By.xpath( "//android.widget.Button[@text='Continue']" ) );
-//        loginAsButton.click();
-
         WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
         searchTextView.sendKeys( search_keywords_0 + " \n" );
 
@@ -74,17 +74,13 @@ public class appiumTest {
         final WebElement closeButton = driver.findElement( By.id("tutorial_tool_tip_close_button") );
         closeButton.click();
 //
+        final String product_title_0 = prop.getProperty( "product_title_0" );
 //        while ( !isElementPresent() ){
-        waitForElementToBePresent();
+        waitForElementToBePresent(product_title_0);
 //        }
 
         final WebElement addToCart1 = driver.findElement( By.id("add-to-cart-button") );
         addToCart1.click();
-
-
-
-
-
 
 //        final WebElement addToCart = driver.findElement(By.xpath( "//android.widget.Button[@text='Add to Basket']" ) );
 //        JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -92,13 +88,13 @@ public class appiumTest {
 
     }
 
-    private void waitForElementToBePresent() {
+    private void waitForElementToBePresent(String productTitle) {
         try {
-            boolean a = isElementPresent();
+            boolean a = isElementPresent( productTitle );
             System.out.print( "element found -- inside waitforElement" );
 //            scrollWithTouchAction("up", 0, 0, 280, 1700, 1);
         } catch (NoSuchElementException ex) {
-            System.out.print( "element not found -- inside catch waitForElement" );
+            System.out.println( "element not found -- inside catch waitForElement" );
             scrollWithTouchAction("up", 0, 0, 280, 1700, 1);
         }
     }
@@ -117,20 +113,19 @@ public class appiumTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
 
-    private boolean isElementPresent( ) {
+    private boolean isElementPresent( String id ) {
         try {
 //            return driver.findElements( By.id( "//add-to-cart-button" ) ).size() > 0;
-            final WebElement addToCart1 = driver.findElement(By.id("add-to-cart-button"));
+            driver.findElement(By.linkText( id ));
             scrollWithTouchAction("up", 0, 0, 280, 1500, 1);
             scrollWithTouchAction("up", 0, 0, 280, 1500, 1);
 //            scrollWithTouchAction("up", 0, 0, 280, 1500, 1);
-            final WebElement addToCart2 = driver.findElement(By.id("add-to-cart-button"));
-            addToCart2.click();
+            final WebElement element = driver.findElement(By.linkText( id ));
+            element.click();
             return true;
 //            return driver.findElements(By.xpath( "//android.widget.Button[@text='Add to Basket']" ) ).size() > 0;
         }catch ( NoSuchElementException ex) {
