@@ -30,28 +30,37 @@ public class appiumTest {
         PropertyFile propertyFile = readFromFile();
         setUpDriver( propertyFile );
         appiumActions = new AppiumActions();
-        //            if ( propertyFile.isFullReset() )
-//                driver.resetApp();
         try {
-            final String search_keywords_0 = propertyFile.getSearchKeywords0();
-            WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
-            searchTextView.sendKeys( search_keywords_0 + "  \n" );
-
-            final String product_title_0 = propertyFile.getProductTitle0();
-            waitForElementToBePresentByTextAndThenClick( product_title_0 );
-
-            // driver.findElement( By.id( "com.amazon.mShop.android.shopping:id/rs_results_image" ) ).click();
-            switchContext("WEBVIEW");
-            waitForElementToBePresentByIdAndThenClick( "add-to-cart-button" );
-            WebElement webElement =
-                    driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
-            webElement.click();
-
-
-        } catch ( NoSuchElementException e ) {
+            final String searchKeyword = propertyFile.getSearchKeywords0();
+            final String productTitle = propertyFile.getProductTitle0();
+            findForProductInTheList( searchKeyword, productTitle );
+            addProductToCart();
+        }
+        catch ( NoSuchElementException e ) {
             System.out.println( "Element not found" );
             e.printStackTrace();
         }
+    }
+
+    private void addProductToCart() {
+        switchContext("WEBVIEW");
+        waitForElementToBePresentByIdAndThenClick( "add-to-cart-button" );
+        WebElement webElement =
+                driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
+        webElement.click();
+    }
+
+    private PropertyFile readFromFile() {
+        PropertyFile prop = null;
+        ObjectMapper mapper = new ObjectMapper( new YAMLFactory() );
+        try {
+            prop = mapper.readValue( new File( "datafile.yaml" ), PropertyFile.class );
+        } catch ( NoSuchElementException | IOException e ) {
+            System.out.println( "Could not read from the file" );
+            e.printStackTrace();
+            end();
+        }
+        return prop;
     }
 
     private void setUpDriver( final PropertyFile prop ) {
@@ -80,17 +89,10 @@ public class appiumTest {
         }
     }
 
-    private PropertyFile readFromFile() {
-        PropertyFile prop = null;
-        ObjectMapper mapper = new ObjectMapper( new YAMLFactory() );
-        try {
-            prop = mapper.readValue( new File( "datafile.yaml" ), PropertyFile.class );
-        } catch ( NoSuchElementException | IOException e ) {
-            System.out.println( "Could not read from the file" );
-            e.printStackTrace();
-            end();
-        }
-        return prop;
+    private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
+        WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
+        searchTextView.sendKeys( searchKeyword + "  \n" );
+        waitForElementToBePresentByTextAndThenClick( productTitle );
     }
 
     private void switchContext( final String context ) {
@@ -163,7 +165,6 @@ public class appiumTest {
         }
         return false;
     }
-
 
     @AfterTest
     public void end() {
