@@ -24,30 +24,22 @@ public class appiumTest {
 
     private AndroidDriver driver;
     private AppiumActions appiumActions;
+    private AppiumElement element;
 
     @Test
     public void checkoutProductFlow() {
         PropertyFile propertyFile = readFromFile();
         setUpDriver( propertyFile );
         appiumActions = new AppiumActions();
+        element = new AppiumElement( driver );
         try {
-            final String searchKeyword = propertyFile.getSearchKeywords0();
-            final String productTitle = propertyFile.getProductTitle0();
-            findForProductInTheList( searchKeyword, productTitle );
+            findForProductInTheList( propertyFile.getSearchKeywords0(), propertyFile.getProductTitle0() );
             addProductToCart();
         }
         catch ( NoSuchElementException e ) {
             System.out.println( "Element not found" );
             e.printStackTrace();
         }
-    }
-
-    private void addProductToCart() {
-        switchContext("WEBVIEW");
-        waitForElementToBePresentByIdAndThenClick( "add-to-cart-button" );
-        WebElement webElement =
-                driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
-        webElement.click();
     }
 
     private PropertyFile readFromFile() {
@@ -95,6 +87,14 @@ public class appiumTest {
         waitForElementToBePresentByTextAndThenClick( productTitle );
     }
 
+    private void addProductToCart() {
+        switchContext("WEBVIEW");
+        waitForElementToBePresentByIdAndThenClick( "add-to-cart-button" );
+        WebElement webElement =
+                driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
+        webElement.click();
+    }
+
     private void switchContext( final String context ) {
         Set<String> allContextHandles = driver.getContextHandles();
         for(String contextHandle : allContextHandles)
@@ -111,7 +111,7 @@ public class appiumTest {
 
     private void waitForElementToBePresentByIdAndThenClick( String id) {
         try {
-            while (!isElementPresentById( id )){
+            while (!element.isPresentById( id )){
                 appiumActions.swipeUpElement( driver,700, 500);
             }
             final WebElement webElement =
@@ -131,7 +131,7 @@ public class appiumTest {
 
     private void waitForElementToBePresentByTextAndThenClick( String text ) {
         try {
-            while (!isElementPresentByText( text )){
+            while (!element.isPresentByText( text )){
                 appiumActions.swipeUpElement( driver, 700, 600);
             }
             final WebElement webElement =
@@ -140,30 +140,6 @@ public class appiumTest {
         } catch ( NoSuchElementException ex ) {
             appiumActions.swipeUpElement( driver,700, 600);
         }
-    }
-
-    private boolean isElementPresentById( String id) {
-        try {
-            if( driver.findElement(
-                     By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"))
-                    .isDisplayed())
-                return true;
-        } catch ( NoSuchElementException ex ) {
-            appiumActions.swipeUpElement( driver,700, 500);
-            return false;
-        }
-        return false;
-    }
-
-    private boolean isElementPresentByText( String text ) {
-        try {
-            if( driver.findElements(By.xpath("//*[contains(@text,'"+text+"')]")).size()>0)
-                return true;
-        } catch ( NoSuchElementException ex ) {
-            appiumActions.swipeUpElement( driver, 700, 600);
-            return false;
-        }
-        return false;
     }
 
     @AfterTest
