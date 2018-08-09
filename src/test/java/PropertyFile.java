@@ -1,9 +1,11 @@
 public class PropertyFile {
-    String deviceName;
-    String apkPath;
-    boolean fullReset;
-    String searchKeywords0;
-    String productTitle0;
+    private String deviceName;
+    private String androidVersion;
+    private String port;
+    private String apkPath;
+    private boolean fullReset;
+    private String searchKeywords0;
+    private String productTitle0;
 
     public String getDeviceName() {
         return deviceName;
@@ -11,6 +13,22 @@ public class PropertyFile {
 
     public void setDeviceName( final String deviceName ) {
         this.deviceName = deviceName;
+    }
+
+    public String getAndroidVersion() {
+        return androidVersion;
+    }
+
+    public void setAndroidVersion( final String androidVersion ) {
+        this.androidVersion = androidVersion;
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort( final String port ) {
+        this.port = port;
     }
 
     public String getApkPath() {

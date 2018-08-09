@@ -59,20 +59,20 @@ public class appiumTest {
         try {
             DesiredCapabilities capabilities = new DesiredCapabilities();
             // Parameterize this device name
-            capabilities.setCapability( "deviceName", prop.getDeviceName() );
             capabilities.setCapability( CapabilityType.BROWSER_NAME, "Android" );
-            capabilities.setCapability( CapabilityType.VERSION, "7.0.1" );
             capabilities.setCapability( "platformName", "Android" );
             capabilities.setCapability( MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM );
+            capabilities.setCapability( MobileCapabilityType.FULL_RESET, true );
 
-            capabilities.setCapability( MobileCapabilityType.FULL_RESET, false );
-            capabilities.setCapability( MobileCapabilityType.NO_RESET, false );
+            capabilities.setCapability( CapabilityType.VERSION, prop.getAndroidVersion() );
+            capabilities.setCapability( "deviceName", prop.getDeviceName() );
+            capabilities.setCapability( "app", prop.getApkPath() );
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
             capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
             //        capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
 
             //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
-            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:4723/wd/hub" ), capabilities );
+            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + prop.getPort() + "/wd/hub" ), capabilities );
             driver.manage().timeouts().implicitlyWait( 25, TimeUnit.SECONDS );
         } catch ( MalformedURLException e ){
             System.out.println( "Could not create the android driver" );
@@ -82,6 +82,9 @@ public class appiumTest {
     }
 
     private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
+        WebElement skipSignInButton = driver.findElement(
+                By.xpath("//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']"));
+        skipSignInButton.click();
         WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
         searchTextView.sendKeys( searchKeyword + "  \n" );
         waitForElementToBePresentByTextAndThenClick( productTitle );

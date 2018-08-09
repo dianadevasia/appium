@@ -1,5 +1,7 @@
 deviceName: ZY2239T773
-apkPath: /Users/dianadevasia/Desktop/com.amazon.mShop.android.shopping.apk
+androidVersion: 7.0.1
+port: 4727
+apkPath: /Users/dianadevasia/Desktop/Amazon Shopping_16.14.0.100-apk.tools.apk
 fullReset: false
 searchKeywords0: samsung galaxy s8
 productTitle0: Samsung Galaxy S8 Smartphone 5.8 Inch Touch Screen 64GB Internal Memory, Android OS
