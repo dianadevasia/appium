@@ -2,91 +2,131 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.remote.AutomationName;
 import io.appium.java_client.remote.MobileCapabilityType;
 
 public class appiumTest {
 
-    AndroidDriver driver;
-    WebDriverWait wait;
-    JavascriptExecutor js;
-
-    @BeforeTest
-    public void setUp() throws MalformedURLException {
-
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-
-        capabilities.setCapability( "deviceName", "ZY2239T773" );
-        capabilities.setCapability( CapabilityType.BROWSER_NAME, "Android" );
-        capabilities.setCapability( CapabilityType.VERSION, "7.0.1" );
-        capabilities.setCapability( "platformName", "Android" );
-        capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
-        capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
-        capabilities.setCapability( MobileCapabilityType.FULL_RESET, false );
-        capabilities.setCapability( MobileCapabilityType.NO_RESET, true );
-
-        //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
-        driver = new AndroidDriver<>( new URL( "http://127.0.0.1:4723/wd/hub" ), capabilities );
-        driver.manage().timeouts().implicitlyWait( 25, TimeUnit.SECONDS );
-    }
+    private AndroidDriver driver;
+    private AppiumActions appiumActions;
+    private AppiumElement element;
 
     @Test
     public void checkoutProductFlow() {
-        PropertyFile prop;
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        PropertyFile propertyFile = readFromFile();
+        setUpDriver( propertyFile );
+        appiumActions = new AppiumActions();
+        element = new AppiumElement( driver );
         try {
-            prop = mapper.readValue( new File( "datafile.yaml" ), PropertyFile.class );
-            final String product_title_0 = prop.getProductTitle0();
-            if ( prop.getClearApkDataOnStart().equals( "true" ) )
-                driver.resetApp();
-            final String search_keywords_0 = prop.getSearchKeywords0();
-            WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
-            searchTextView.sendKeys( search_keywords_0 + "  \n" );
-
-
-            waitForElementToBePresentByTextAndThenClick( product_title_0 );
-
-            //        driver.findElement( By.id( "com.amazon.mShop.android.shopping:id/rs_results_image" ) ).click();
-            waitForElementToBePresentByIdAndThenClick( "add-to-cart-button" );
-
-        } catch ( NoSuchElementException| IOException e ) {
-            System.out.println( "Element not found for tooltip or edit text to enter keyword" );
+            findForProductInTheList( propertyFile.getSearchKeywords0(), propertyFile.getProductTitle0() );
+            addProductToCart();
+        }
+        catch ( NoSuchElementException e ) {
+            System.out.println( "Element not found" );
             e.printStackTrace();
         }
     }
 
+    private PropertyFile readFromFile() {
+        PropertyFile prop = null;
+        ObjectMapper mapper = new ObjectMapper( new YAMLFactory() );
+        try {
+            prop = mapper.readValue( new File( "datafile.yaml" ), PropertyFile.class );
+        } catch ( NoSuchElementException | IOException e ) {
+            System.out.println( "Could not read from the file" );
+            e.printStackTrace();
+            end();
+        }
+        return prop;
+    }
+
+    private void setUpDriver( final PropertyFile prop ) {
+        try {
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            // Parameterize this device name
+            capabilities.setCapability( CapabilityType.BROWSER_NAME, "Android" );
+            capabilities.setCapability( "platformName", "Android" );
+            capabilities.setCapability( MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM );
+            capabilities.setCapability( MobileCapabilityType.FULL_RESET, true );
+
+            capabilities.setCapability( CapabilityType.VERSION, prop.getAndroidVersion() );
+            capabilities.setCapability( "deviceName", prop.getDeviceName() );
+            capabilities.setCapability( "app", prop.getApkPath() );
+            capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
+            capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
+            //        capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
+
+            //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
+            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + prop.getPort() + "/wd/hub" ), capabilities );
+            driver.manage().timeouts().implicitlyWait( 25, TimeUnit.SECONDS );
+        } catch ( MalformedURLException e ){
+            System.out.println( "Could not create the android driver" );
+            e.printStackTrace();
+            end();
+        }
+    }
+
+    private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
+        WebElement skipSignInButton = driver.findElement(
+                By.xpath("//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']"));
+        skipSignInButton.click();
+        WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
+        searchTextView.sendKeys( searchKeyword + "  \n" );
+        waitForElementToBePresentByTextAndThenClick( productTitle );
+    }
+
+    private void addProductToCart() {
+        switchContext("WEBVIEW");
+        waitForElementToBePresentByIdAndThenClick( "add-to-cart-button" );
+        WebElement webElement =
+                driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
+        webElement.click();
+    }
+
+    private void switchContext( final String context ) {
+        Set<String> allContextHandles = driver.getContextHandles();
+        for(String contextHandle : allContextHandles)
+        {
+            System.out.println("Available Context : "+contextHandle);
+            if(contextHandle.contains(context))
+            {
+                driver.context(contextHandle);
+                break;
+            }
+        }
+        System.out.println("After Switching : "+driver.getContext());
+    }
+
     private void waitForElementToBePresentByIdAndThenClick( String id) {
         try {
-            while (!isElementPresentById( id )){
-                swipeUpElement( 700, 500);
+            while (!element.isPresentById( id )){
+                appiumActions.swipeUpElement( driver,700, 500);
             }
             final WebElement webElement =
                     driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
 
-            swipeUpElement( 700, 530 );
+            appiumActions.swipeUpElement( driver,700, 530 );
             Thread.sleep( 5000 );
             webElement.click();
             Thread.sleep( 600000 );
             System.out.print( "element found -- inside waitforElement" );
         } catch ( NoSuchElementException ex ) {
-            swipeUpElement( 700, 500 );
+            appiumActions.swipeUpElement( driver, 700, 500 );
         } catch ( InterruptedException e ) {
             e.printStackTrace();
         }
@@ -94,59 +134,19 @@ public class appiumTest {
 
     private void waitForElementToBePresentByTextAndThenClick( String text ) {
         try {
-            while (!isElementPresentByText( text )){
-                swipeUpElement( 700, 600);
+            while (!element.isPresentByText( text )){
+                appiumActions.swipeUpElement( driver, 700, 600);
             }
             final WebElement webElement =
                     (WebElement) driver.findElements(By.xpath("//*[contains(@text,'"+text+"')]")).get( 0 );
             webElement.click();
         } catch ( NoSuchElementException ex ) {
-            swipeUpElement( 700, 600);
+            appiumActions.swipeUpElement( driver,700, 600);
         }
     }
-
-    public void swipeUpElement( final int y2, final int y1 ) {
-        try {
-            TouchAction touchAction = new TouchAction( driver );
-            touchAction.press( 0, y2 ).moveTo( 0, y1 ).release().perform();
-            Thread.sleep( 5000 );
-        }
-        catch ( NoSuchElementException ex ){
-            ex.printStackTrace();
-            System.out.println( "element not found -- inside swipeUpElement " );
-        } catch ( InterruptedException e ) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private boolean isElementPresentById( String id) {
-        try {
-            if( driver.findElement(
-                    By.xpath("//android.view.View[contains(@resource-id,'add-to-wishlist-button-submit') and @text='ADD TO LIST']"))
-                    .isDisplayed())
-                return true;
-        } catch ( NoSuchElementException ex ) {
-            swipeUpElement( 700, 500);
-            return false;
-        }
-        return false;
-    }
-
-    private boolean isElementPresentByText( String text ) {
-        try {
-            if( driver.findElements(By.xpath("//*[contains(@text,'"+text+"')]")).size()>0)
-                return true;
-        } catch ( NoSuchElementException ex ) {
-            swipeUpElement(700, 600);
-            return false;
-        }
-        return false;
-    }
-
 
     @AfterTest
-    public void End() {
+    public void end() {
         driver.quit();
     }
 }
