@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -16,6 +15,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.remote.AutomationName;
 import io.appium.java_client.remote.MobileCapabilityType;
@@ -91,30 +91,20 @@ public class appiumTest {
     }
 
     private void addProductToCart() {
-        switchContext("WEBVIEW");
-        waitForElementToBePresentByIdAndThenClick( "add-to-cart-button" );
         WebElement webElement =
                 driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
+        int topYofWebElement = webElement.getLocation().getY();
+        int bottomYofWebElement = topYofWebElement + webElement.getSize().getHeight();
+        int centerXofWebElement = webElement.getLocation().getX() + (webElement.getSize().getWidth()/2);
+        new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
+        new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
         webElement.click();
-    }
-
-    private void switchContext( final String context ) {
-        Set<String> allContextHandles = driver.getContextHandles();
-        for(String contextHandle : allContextHandles)
-        {
-            System.out.println("Available Context : "+contextHandle);
-            if(contextHandle.contains(context))
-            {
-                driver.context(contextHandle);
-                break;
-            }
-        }
-        System.out.println("After Switching : "+driver.getContext());
     }
 
     private void waitForElementToBePresentByIdAndThenClick( String id) {
         try {
             while (!element.isPresentById( id )){
+
                 appiumActions.swipeUpElement( driver,700, 500);
             }
             final WebElement webElement =
