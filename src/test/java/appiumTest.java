@@ -35,9 +35,10 @@ public class appiumTest {
     public void checkoutProductFlow() {
         System.out.println( "port1" + System.getenv("port1"));
 
+        final String port = System.getenv( "port1" );
         propertyFile = readFromFile();
-        startAppiumServer( propertyFile.getPort() );
-        setUpDriver( propertyFile );
+        startAppiumServer( port );
+        setUpDriver( propertyFile, port );
         appiumActions = new AppiumActions();
         element = new AppiumElement( driver );
         try {
@@ -72,7 +73,7 @@ public class appiumTest {
         return prop;
     }
 
-    private void setUpDriver( final PropertyFile prop ) {
+    private void setUpDriver( final PropertyFile prop, String port ) {
         try {
             DesiredCapabilities capabilities = new DesiredCapabilities();
             // Parameterize this device name
@@ -89,7 +90,7 @@ public class appiumTest {
             //        capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
 
             //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
-            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + prop.getPort() + "/wd/hub" ), capabilities );
+            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + port + "/wd/hub" ), capabilities );
             driver.manage().timeouts().implicitlyWait( 25, TimeUnit.SECONDS );
         } catch ( MalformedURLException e ){
             System.out.println( "Could not create the android driver" );
