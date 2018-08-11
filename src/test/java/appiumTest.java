@@ -114,6 +114,11 @@ public class appiumTest {
         new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
         new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
         webElement.click();
+        try {
+            Thread.sleep( 5000 );
+        } catch ( InterruptedException e ) {
+            e.printStackTrace();
+        }
     }
 
     private void waitForElementToBePresentByIdAndThenClick( String id) {
