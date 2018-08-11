@@ -23,6 +23,8 @@ public class AppiumElement {
             for( WebElement itemTitleElement : itemTitlesElement){
                 final String titleText = itemTitleElement.getText();
                 String s = titleText.replaceAll("[^0-9a-zA-Z]","");
+                System.out.println( "Printing the string obtained after trimming:: "+ s );
+                System.out.println( "Printing the string passed as argument after trimming:: "+ text );
                 if( s.equals( text ))
                     return counter;
                 counter++;
