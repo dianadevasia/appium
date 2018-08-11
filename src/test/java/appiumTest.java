@@ -29,20 +29,16 @@ public class appiumTest {
     private AndroidDriver driver;
     private AppiumActions appiumActions;
     private AppiumElement element;
-    private PropertyFile propertyFile;
 
     @Test
     public void checkoutProductFlow() {
-        System.out.println( "port1" + System.getenv("port1"));
-
-        final String port = System.getenv( "port1" );
-        propertyFile = readFromFile();
-        startAppiumServer( port );
-        setUpDriver( propertyFile, port );
+//        propertyFile = readFromFile();
+        startAppiumServer( System.getProperty( "port" ) );
+        setUpDriver();
         appiumActions = new AppiumActions();
         element = new AppiumElement( driver );
         try {
-            findForProductInTheList( propertyFile.getSearchKeywords0(), propertyFile.getProductTitle0() );
+            findForProductInTheList( System.getProperty( "searchKeywords0"), System.getProperty( "productTitle0" ) );
             addProductToCart();
         }
         catch ( NoSuchElementException e ) {
@@ -73,7 +69,7 @@ public class appiumTest {
         return prop;
     }
 
-    private void setUpDriver( final PropertyFile prop, String port ) {
+    private void setUpDriver() {
         try {
             DesiredCapabilities capabilities = new DesiredCapabilities();
             // Parameterize this device name
@@ -82,15 +78,15 @@ public class appiumTest {
             capabilities.setCapability( MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM );
             capabilities.setCapability( MobileCapabilityType.FULL_RESET, true );
 
-            capabilities.setCapability( CapabilityType.VERSION, prop.getAndroidVersion() );
-            capabilities.setCapability( "deviceName", prop.getDeviceName() );
-            capabilities.setCapability( "app", prop.getApkPath() );
+            capabilities.setCapability( CapabilityType.VERSION, System.getProperty("androidVersion" ) );
+            capabilities.setCapability( "deviceName", System.getProperty("deviceName" ) );
+            capabilities.setCapability( "app", System.getProperty("apkPath" ) );
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
             capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
             //        capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
 
             //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
-            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + port + "/wd/hub" ), capabilities );
+            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + System.getProperty("port" ) + "/wd/hub" ), capabilities );
             driver.manage().timeouts().implicitlyWait( 25, TimeUnit.SECONDS );
         } catch ( MalformedURLException e ){
             System.out.println( "Could not create the android driver" );
@@ -196,7 +192,7 @@ public class appiumTest {
     @AfterTest
     public void end() {
         driver.quit();
-        if(propertyFile.getPort() != null)
-            stopAppiumServer( propertyFile.getPort() );
+        if(System.getProperty( "port" ) != null)
+            stopAppiumServer( System.getProperty( "port" ) );
     }
 }

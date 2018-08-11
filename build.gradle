@@ -22,10 +22,14 @@ dependencies {
     compile group:  'com.google.code.gson', name: 'gson', version: '2.7'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.5.0'
-
-
 }
-
-test{
+test {
+    systemProperty 'deviceName', System.properties['deviceName'] ?: ''
+    systemProperty 'androidVersion', System.properties['androidVersion'] ?: ''
+    systemProperty 'port', System.properties['port'] ?: ''
+    systemProperty 'apkPath', System.properties['apkPath'] ?: ''
+    systemProperty 'fullReset', System.properties['fullReset'] ?: ''
+    systemProperty 'searchKeywords0', System.properties['searchKeywords0'] ?: ''
+    systemProperty 'productTitle0', System.properties['productTitle0'] ?: ''
     useTestNG()
 }
