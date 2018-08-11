@@ -29,7 +29,7 @@ test {
     systemProperty 'port', System.properties['port'] ?: ''
     systemProperty 'apkPath', System.properties['apkPath'] ?: ''
     systemProperty 'fullReset', System.properties['fullReset'] ?: ''
-    systemProperty 'searchKeywords0', System.properties['searchKeywords0'] ?: ''
-    systemProperty 'productTitle0', System.properties['productTitle0'] ?: ''
+    systemProperty 'searchKeywords', System.properties['searchKeywords'] ?: ''
+    systemProperty 'productTitle', System.properties['productTitle'] ?: ''
     useTestNG()
 }
