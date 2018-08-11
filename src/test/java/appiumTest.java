@@ -33,6 +33,8 @@ public class appiumTest {
 
     @Test
     public void checkoutProductFlow() {
+        System.out.println( "port1" + System.getenv("port1"));
+
         propertyFile = readFromFile();
         startAppiumServer( propertyFile.getPort() );
         setUpDriver( propertyFile );
