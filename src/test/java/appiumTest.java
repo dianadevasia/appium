@@ -79,9 +79,14 @@ public class appiumTest {
     }
 
     private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
-        WebElement skipSignInButton = driver.findElement(
-                By.xpath("//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']"));
-        skipSignInButton.click();
+        try {
+            WebElement skipSignInButton = driver.findElement(
+                    By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" ) );
+            skipSignInButton.click();
+        }
+        catch ( NoSuchElementException ex ){
+            System.out.println( "Sign in button not present" );
+        }
         WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
         final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
         final String parsedProductTitle = productTitle.replaceAll( "_", " " );
