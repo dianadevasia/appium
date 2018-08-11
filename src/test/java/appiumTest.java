@@ -28,7 +28,6 @@ public class appiumTest {
 
     @Test
     public void checkoutProductFlow() {
-//        propertyFile = readFromFile();
         startAppiumServer( System.getProperty( "port" ) );
         setUpDriver();
         appiumActions = new AppiumActions();
@@ -55,7 +54,6 @@ public class appiumTest {
     private void setUpDriver() {
         try {
             DesiredCapabilities capabilities = new DesiredCapabilities();
-            // Parameterize this device name
             capabilities.setCapability( CapabilityType.BROWSER_NAME, "Android" );
             capabilities.setCapability( "platformName", "Android" );
             capabilities.setCapability( MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM );
@@ -66,7 +64,6 @@ public class appiumTest {
             capabilities.setCapability( "app", System.getProperty("apkPath" ) );
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
             capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
-            //        capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
 
             //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
             driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + System.getProperty("port" ) + "/wd/hub" ), capabilities );
@@ -182,7 +179,10 @@ public class appiumTest {
     @AfterTest
     public void end() {
         driver.quit();
-        if(System.getProperty( "port" ) != null)
+        System.out.println( "Stopped the driver" );
+        if(System.getProperty( "port" ) != null) {
             stopAppiumServer( System.getProperty( "port" ) );
+            System.out.println( "Stopped the appium server" );
+        }
     }
 }
