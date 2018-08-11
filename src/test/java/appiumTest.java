@@ -1,5 +1,7 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -19,16 +21,20 @@ import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.remote.AutomationName;
 import io.appium.java_client.remote.MobileCapabilityType;
+import io.appium.java_client.service.local.AppiumDriverLocalService;
+import io.appium.java_client.service.local.AppiumServiceBuilder;
 
 public class appiumTest {
 
     private AndroidDriver driver;
     private AppiumActions appiumActions;
     private AppiumElement element;
+    private PropertyFile propertyFile;
 
     @Test
     public void checkoutProductFlow() {
-        PropertyFile propertyFile = readFromFile();
+        propertyFile = readFromFile();
+        startAppiumServer( propertyFile.getPort() );
         setUpDriver( propertyFile );
         appiumActions = new AppiumActions();
         element = new AppiumElement( driver );
@@ -40,6 +46,15 @@ public class appiumTest {
             System.out.println( "Element not found" );
             e.printStackTrace();
         }
+    }
+
+    private void startAppiumServer( final String port ) {
+        AppiumDriverLocalService service = AppiumDriverLocalService.buildService(
+                new AppiumServiceBuilder()
+                        .withAppiumJS(new File("/usr/local/Cellar/node/7.4.0/lib/node_modules/appium/build/lib/main.js"))
+                        .withIPAddress("127.0.0.1")
+                        .usingPort(Integer.parseInt(port)));
+        service.start();
     }
 
     private PropertyFile readFromFile() {
@@ -135,8 +150,45 @@ public class appiumTest {
         }
     }
 
+    private static void runCommandAndWaitToComplete( String[] command ) {
+        String completeCommand = String.join(" ", command);
+        System.out.println("Executing command: " + completeCommand);
+        String line;
+        String returnValue = "";
+
+        try {
+            Process processCommand = Runtime.getRuntime().exec(command);
+            BufferedReader response = new BufferedReader(new InputStreamReader(processCommand.getInputStream()));
+
+            try {
+                processCommand.waitFor();
+            } catch (InterruptedException commandInterrupted) {
+                System.out.println("Were waiting for process to end but something interrupted it" + commandInterrupted.getMessage());
+            }
+
+            while ((line = response.readLine()) != null) {
+                returnValue = returnValue + line + "\n";
+            }
+            response.close();
+
+        } catch (Exception e) {
+            System.out.println("Unable to run command: " + completeCommand + ". Error: " + e.getMessage());
+        }
+        System.out.println("Response : runCMDAndWaitToComplete(" + completeCommand + ") : " + returnValue);
+    }
+
+    private static void stopAppiumServer(String port) {
+        System.out.println(String.format("Stopping Appium server on port %s", port));
+
+        // command to stop Appium service running on port --> sh -c lsof -P | grep ':4723' | awk '{print $2}' | xargs kill -9
+        String stopCommand[] = new String[]{"sh", "-c", String.format("lsof -P | grep ':%s' | awk '{print $2}' | xargs kill -9", port)};
+        runCommandAndWaitToComplete(stopCommand);
+    }
+
     @AfterTest
     public void end() {
         driver.quit();
+        if(propertyFile.getPort() != null)
+            stopAppiumServer( propertyFile.getPort() );
     }
 }
