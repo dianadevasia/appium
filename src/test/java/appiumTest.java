@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,9 +12,6 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
@@ -54,19 +50,6 @@ public class appiumTest {
                         .withIPAddress("127.0.0.1")
                         .usingPort(Integer.parseInt(port)));
         service.start();
-    }
-
-    private PropertyFile readFromFile() {
-        PropertyFile prop = null;
-        ObjectMapper mapper = new ObjectMapper( new YAMLFactory() );
-        try {
-            prop = mapper.readValue( new File( "datafile.yaml" ), PropertyFile.class );
-        } catch ( NoSuchElementException | IOException e ) {
-            System.out.println( "Could not read from the file" );
-            e.printStackTrace();
-            end();
-        }
-        return prop;
     }
 
     private void setUpDriver() {
