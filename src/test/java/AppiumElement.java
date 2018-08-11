@@ -22,7 +22,7 @@ public class AppiumElement {
             int counter = 0;
             for( WebElement itemTitleElement : itemTitlesElement){
                 final String titleText = itemTitleElement.getText();
-                String s = titleText.replaceAll( " ", "" ).replaceAll("\u00A0","");
+                String s = titleText.replaceAll("[^0-9a-zA-Z]","");
                 if( s.equals( text ))
                     return counter;
                 counter++;
