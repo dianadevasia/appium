@@ -86,8 +86,12 @@ public class appiumTest {
         }
         WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
         final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
-        final String parsedProductTitle = productTitle.replaceAll( "_", " " );
+        final String parsedProductTitle = productTitle.replaceAll( "_", "" );
         searchTextView.sendKeys( parsedSearchKeyword + "  \n" );
+        WebElement closeButton = driver.findElement( By.id( "tutorial_tool_tip_close_button" ) );
+         if (closeButton.isDisplayed()){
+             closeButton.click();
+        }
         waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
     }
 
@@ -130,11 +134,12 @@ public class appiumTest {
 
     private void waitForElementToBePresentByTextAndThenClick( String text ) {
         try {
-            while (!element.isPresentByText( text )){
+            int indexOfText = -1;
+            while ( (indexOfText = element.getIndexByText( text ))  == -1){
                 appiumActions.swipeUpElement( driver, 700, 600);
             }
-            final WebElement webElement =
-                    (WebElement) driver.findElements(By.xpath("//*[contains(@text,'"+text+"')]")).get( 0 );
+
+            final WebElement webElement = (WebElement) driver.findElements(By.id( "item_title" )).get( indexOfText );
             webElement.click();
         } catch ( NoSuchElementException ex ) {
             appiumActions.swipeUpElement( driver,700, 600);

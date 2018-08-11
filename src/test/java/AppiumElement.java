@@ -1,5 +1,8 @@
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import io.appium.java_client.android.AndroidDriver;
 
@@ -13,15 +16,22 @@ public class AppiumElement {
         appiumActions = new AppiumActions();
     }
 
-    public boolean isPresentByText( String text ) {
+    public int getIndexByText( String text ) {
         try {
-            if( driver.findElements( By.xpath("//*[contains(@text,'"+text+"')]")).size()>0)
-                return true;
+            final List<WebElement> itemTitlesElement = driver.findElements( By.id( "item_title" ) );
+            int counter = 0;
+            for( WebElement itemTitleElement : itemTitlesElement){
+                final String titleText = itemTitleElement.getText();
+                String s = titleText.replaceAll( " ", "" ).replaceAll("\u00A0","");
+                if( s.equals( text ))
+                    return counter;
+                counter++;
+            }
+            return -1;
         } catch ( NoSuchElementException ex ) {
             appiumActions.swipeUpElement( driver, 700, 600);
-            return false;
+            return -1;
         }
-        return false;
     }
 
 
