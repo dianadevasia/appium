@@ -38,7 +38,7 @@ public class appiumTest {
         appiumActions = new AppiumActions();
         element = new AppiumElement( driver );
         try {
-            findForProductInTheList( System.getProperty( "searchKeywords0"), System.getProperty( "productTitle0" ) );
+            findForProductInTheList( System.getProperty( "searchKeywords"), System.getProperty( "productTitle" ) );
             addProductToCart();
         }
         catch ( NoSuchElementException e ) {
@@ -100,8 +100,10 @@ public class appiumTest {
                 By.xpath("//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']"));
         skipSignInButton.click();
         WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
-        searchTextView.sendKeys( searchKeyword + "  \n" );
-        waitForElementToBePresentByTextAndThenClick( productTitle );
+        final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
+        final String parsedProductTitle = productTitle.replaceAll( "_", " " );
+        searchTextView.sendKeys( parsedSearchKeyword + "  \n" );
+        waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
     }
 
     private void addProductToCart() {
