@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,9 +13,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.remote.AutomationName;
@@ -29,17 +25,16 @@ public class appiumTest {
     private AndroidDriver driver;
     private AppiumActions appiumActions;
     private AppiumElement element;
-    private PropertyFile propertyFile;
 
     @Test
     public void checkoutProductFlow() {
-        propertyFile = readFromFile();
-        startAppiumServer( propertyFile.getPort() );
-        setUpDriver( propertyFile );
+//        propertyFile = readFromFile();
+        startAppiumServer( System.getProperty( "port" ) );
+        setUpDriver();
         appiumActions = new AppiumActions();
         element = new AppiumElement( driver );
         try {
-            findForProductInTheList( propertyFile.getSearchKeywords0(), propertyFile.getProductTitle0() );
+            findForProductInTheList( System.getProperty( "searchKeywords"), System.getProperty( "productTitle" ) );
             addProductToCart();
         }
         catch ( NoSuchElementException e ) {
@@ -57,20 +52,7 @@ public class appiumTest {
         service.start();
     }
 
-    private PropertyFile readFromFile() {
-        PropertyFile prop = null;
-        ObjectMapper mapper = new ObjectMapper( new YAMLFactory() );
-        try {
-            prop = mapper.readValue( new File( "datafile.yaml" ), PropertyFile.class );
-        } catch ( NoSuchElementException | IOException e ) {
-            System.out.println( "Could not read from the file" );
-            e.printStackTrace();
-            end();
-        }
-        return prop;
-    }
-
-    private void setUpDriver( final PropertyFile prop ) {
+    private void setUpDriver() {
         try {
             DesiredCapabilities capabilities = new DesiredCapabilities();
             // Parameterize this device name
@@ -79,15 +61,15 @@ public class appiumTest {
             capabilities.setCapability( MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM );
             capabilities.setCapability( MobileCapabilityType.FULL_RESET, true );
 
-            capabilities.setCapability( CapabilityType.VERSION, prop.getAndroidVersion() );
-            capabilities.setCapability( "deviceName", prop.getDeviceName() );
-            capabilities.setCapability( "app", prop.getApkPath() );
+            capabilities.setCapability( CapabilityType.VERSION, System.getProperty("androidVersion" ) );
+            capabilities.setCapability( "deviceName", System.getProperty("deviceName" ) );
+            capabilities.setCapability( "app", System.getProperty("apkPath" ) );
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
             capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
             //        capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
 
             //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
-            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + prop.getPort() + "/wd/hub" ), capabilities );
+            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + System.getProperty("port" ) + "/wd/hub" ), capabilities );
             driver.manage().timeouts().implicitlyWait( 25, TimeUnit.SECONDS );
         } catch ( MalformedURLException e ){
             System.out.println( "Could not create the android driver" );
@@ -97,12 +79,19 @@ public class appiumTest {
     }
 
     private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
-        WebElement skipSignInButton = driver.findElement(
-                By.xpath("//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']"));
-        skipSignInButton.click();
+        try {
+            WebElement skipSignInButton = driver.findElement(
+                    By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" ) );
+            skipSignInButton.click();
+        }
+        catch ( NoSuchElementException ex ){
+            System.out.println( "Sign in button not present" );
+        }
         WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
-        searchTextView.sendKeys( searchKeyword + "  \n" );
-        waitForElementToBePresentByTextAndThenClick( productTitle );
+        final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
+        final String parsedProductTitle = productTitle.replaceAll( "_", " " );
+        searchTextView.sendKeys( parsedSearchKeyword + "  \n" );
+        waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
     }
 
     private void addProductToCart() {
@@ -114,6 +103,11 @@ public class appiumTest {
         new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
         new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
         webElement.click();
+        try {
+            Thread.sleep( 5000 );
+        } catch ( InterruptedException e ) {
+            e.printStackTrace();
+        }
     }
 
     private void waitForElementToBePresentByIdAndThenClick( String id) {
@@ -188,7 +182,7 @@ public class appiumTest {
     @AfterTest
     public void end() {
         driver.quit();
-        if(propertyFile.getPort() != null)
-            stopAppiumServer( propertyFile.getPort() );
+        if(System.getProperty( "port" ) != null)
+            stopAppiumServer( System.getProperty( "port" ) );
     }
 }
