@@ -31,5 +31,7 @@ test {
     systemProperty 'fullReset', System.properties['fullReset'] ?: ''
     systemProperty 'searchKeywords', System.properties['searchKeywords'] ?: ''
     systemProperty 'productTitle', System.properties['productTitle'] ?: ''
+    systemProperty 'humanTouch', System.properties['humanTouch'] ?: ''
+    systemProperty 'proceedToCheckout', System.properties['proceedToCheckout'] ?: ''
     useTestNG()
 }
