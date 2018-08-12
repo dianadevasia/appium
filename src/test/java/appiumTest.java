@@ -44,8 +44,10 @@ public class appiumTest {
     }
 
     private void proceedToCheckout() {
-        waitForElementToBePresentByIdAndThenClick("action_bar_cart_image");
-        waitForElementToBePresentByIdAndThenClick("a-autoid-0-announce");
+        if(System.getProperty( "proceedToCheckout").equals( "true" )) {
+            waitForElementToBePresentByIdAndThenClick( "action_bar_cart_image" );
+            waitForElementToBePresentByIdAndThenClick( "a-autoid-0-announce" );
+        }
 
     }
 
