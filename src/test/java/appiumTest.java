@@ -54,7 +54,7 @@ public class appiumTest {
     private void startAppiumServer( final String port ) {
         AppiumDriverLocalService service = AppiumDriverLocalService.buildService(
                 new AppiumServiceBuilder()
-                        .withAppiumJS(new File("/usr/local/Cellar/node/7.4.0/lib/node_modules/appium/build/lib/main.js"))
+                        .withAppiumJS(new File(System.getProperty( "appiumJSPath" )))
                         .withIPAddress("127.0.0.1")
                         .usingPort(Integer.parseInt(port)));
         service.start();
