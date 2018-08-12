@@ -35,11 +35,18 @@ public class appiumTest {
         try {
             findForProductInTheList( System.getProperty( "searchKeywords"), System.getProperty( "productTitle" ) );
             addProductToCart();
+            proceedToCheckout();
         }
         catch ( NoSuchElementException e ) {
             System.out.println( "Element not found" );
             e.printStackTrace();
         }
+    }
+
+    private void proceedToCheckout() {
+        waitForElementToBePresentByIdAndThenClick("action_bar_cart_image");
+        waitForElementToBePresentByIdAndThenClick("a-autoid-0-announce");
+
     }
 
     private void startAppiumServer( final String port ) {
@@ -117,13 +124,9 @@ public class appiumTest {
 
                 appiumActions.swipeUpElement( driver,700, 500);
             }
-            final WebElement webElement =
-                    driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
-
-            appiumActions.swipeUpElement( driver,700, 530 );
+            final WebElement webElement = driver.findElement( By.id( id ));
             Thread.sleep( 5000 );
             webElement.click();
-            Thread.sleep( 600000 );
             System.out.print( "element found -- inside waitforElement" );
         } catch ( NoSuchElementException ex ) {
             appiumActions.swipeUpElement( driver, 700, 500 );

@@ -39,9 +39,7 @@ public class AppiumElement {
 
     public boolean isPresentById( String id) {
         try {
-            if( driver.findElement(
-                    By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"))
-                    .isDisplayed())
+            if( driver.findElements( By.id(id)).size() > 0)
                 return true;
         } catch ( NoSuchElementException ex ) {
             appiumActions.swipeUpElement( driver,700, 500);
