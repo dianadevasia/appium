@@ -29,5 +29,6 @@ test {
     systemProperty 'searchKeywords', System.properties['searchKeywords'] ?: ''
     systemProperty 'productTitle', System.properties['productTitle'] ?: ''
     systemProperty 'proceedToCheckout', System.properties['proceedToCheckout'] ?: ''
+    systemProperty 'appiumJSPath', System.properties['appiumJSPath'] ?: ''
     useTestNG()
 }
