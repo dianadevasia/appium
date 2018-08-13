@@ -30,7 +30,7 @@ public class appiumTest {
     public void checkoutProductFlow() {
         startAppiumServer( System.getProperty( "port" ) );
         setUpDriver();
-        appiumActions = new AppiumActions();
+        appiumActions = new AppiumActions(driver);
         element = new AppiumElement( driver );
         try {
             findForProductInTheList( System.getProperty( "searchKeywords"), System.getProperty( "productTitle" ) );
@@ -48,7 +48,6 @@ public class appiumTest {
             waitForElementToBePresentByIdAndThenClick( "action_bar_cart_image" );
             waitForElementToBePresentByIdAndThenClick( "a-autoid-0-announce" );
         }
-
     }
 
     private void startAppiumServer( final String port ) {
@@ -89,19 +88,47 @@ public class appiumTest {
             WebElement skipSignInButton = driver.findElement(
                     By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" ) );
             skipSignInButton.click();
+            final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
+            final String parsedProductTitle = productTitle.replaceAll( "_", "" );
+            WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
+            searchTextView.sendKeys( parsedSearchKeyword + "  \n" );
+            WebElement closeButton = driver.findElement( By.id( "tutorial_tool_tip_close_button" ) );
+            if ( closeButton.isDisplayed() ) {
+                closeButton.click();
+            }
+            enableTouchActions();
+            waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
+        } catch ( NoSuchElementException ex ){
+            ex.printStackTrace();
         }
-        catch ( NoSuchElementException ex ){
-            System.out.println( "Sign in button not present" );
+    }
+
+    private void enableTouchActions() {
+        if(System.getProperty( "humanTouch" ).equals( "true" )){
+            appiumActions.toggleElementAction("android.widget.Switch", "rs_promoted_filter_toggle");
+            appiumActions.toggleFilterButton();
         }
-        WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
-        final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
-        final String parsedProductTitle = productTitle.replaceAll( "_", "" );
-        searchTextView.sendKeys( parsedSearchKeyword + "  \n" );
-        WebElement closeButton = driver.findElement( By.id( "tutorial_tool_tip_close_button" ) );
-         if (closeButton.isDisplayed()){
-             closeButton.click();
+    }
+
+    private void scrollToViewReviews() {
+        if(System.getProperty( "humanTouch" ).equals( "true" )){
+            if( driver.findElements(By.xpath("//*[contains(@text,'Top reviews')]")).size()< 0) {
+                appiumActions.swipeUpElement( 700, 600);
+            }
+            final WebElement webElement =
+                    (WebElement) driver.findElements(By.xpath("//*[contains(@text,'Top reviews')]")).get( 0 );
+
+            int topYofWebElement = webElement.getLocation().getY();
+            int bottomYofWebElement = topYofWebElement + webElement.getSize().getHeight();
+            int centerXofWebElement = webElement.getLocation().getX() + (webElement.getSize().getWidth()/2);
+            for(int i=0; i< 17; i++)
+                new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
+            try {
+                Thread.sleep( 3000 );
+            } catch ( NoSuchElementException | InterruptedException e ) {
+                e.printStackTrace();
+            }
         }
-        waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
     }
 
     private void addProductToCart() {
@@ -123,15 +150,14 @@ public class appiumTest {
     private void waitForElementToBePresentByIdAndThenClick( String id) {
         try {
             while (!element.isPresentById( id )){
-
-                appiumActions.swipeUpElement( driver,700, 500);
+                appiumActions.swipeUpElement( 700, 500);
             }
             final WebElement webElement = driver.findElement( By.id( id ));
             Thread.sleep( 5000 );
             webElement.click();
             System.out.print( "element found -- inside waitforElement" );
         } catch ( NoSuchElementException ex ) {
-            appiumActions.swipeUpElement( driver, 700, 500 );
+            appiumActions.swipeUpElement( 700, 500 );
         } catch ( InterruptedException e ) {
             e.printStackTrace();
         }
@@ -141,13 +167,13 @@ public class appiumTest {
         try {
             int indexOfText = -1;
             while ( (indexOfText = element.getIndexByText( text ))  == -1){
-                appiumActions.swipeUpElement( driver, 700, 600);
+                appiumActions.swipeUpElement( 700, 600);
             }
 
             final WebElement webElement = (WebElement) driver.findElements(By.id( "item_title" )).get( indexOfText );
             webElement.click();
         } catch ( NoSuchElementException ex ) {
-            appiumActions.swipeUpElement( driver,700, 600);
+            appiumActions.swipeUpElement( 700, 600);
         }
     }
 

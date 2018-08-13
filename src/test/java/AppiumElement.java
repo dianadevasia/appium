@@ -11,9 +11,9 @@ public class AppiumElement {
     private final AppiumActions appiumActions;
     private final AndroidDriver driver;
 
-    public AppiumElement(AndroidDriver driver) {
+    AppiumElement( AndroidDriver driver ) {
         this.driver = driver;
-        appiumActions = new AppiumActions();
+        appiumActions = new AppiumActions(driver);
     }
 
     public int getIndexByText( String text ) {
@@ -23,26 +23,23 @@ public class AppiumElement {
             for( WebElement itemTitleElement : itemTitlesElement){
                 final String titleText = itemTitleElement.getText();
                 String s = titleText.replaceAll("[^0-9a-zA-Z()-,.+']","");
-                System.out.println( "Printing the string obtained after trimming:: "+ s );
-                System.out.println( "Printing the string passed as argument after trimming:: "+ text );
                 if( s.equals( text ))
                     return counter;
                 counter++;
             }
             return -1;
         } catch ( NoSuchElementException ex ) {
-            appiumActions.swipeUpElement( driver, 700, 600);
+            appiumActions.swipeUpElement( 700, 600);
             return -1;
         }
     }
-
 
     public boolean isPresentById( String id) {
         try {
             if( driver.findElements( By.id(id)).size() > 0)
                 return true;
         } catch ( NoSuchElementException ex ) {
-            appiumActions.swipeUpElement( driver,700, 500);
+            appiumActions.swipeUpElement( 700, 500);
             return false;
         }
         return false;
