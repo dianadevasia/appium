@@ -18,10 +18,10 @@ dependencies {
     compile group:  'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: '2.53.1'
     compile group:  'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version: '2.53.1'
     compile group:  'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: '2.53.1'
-    compile group:  'io.appium', name: 'java-client', version: '4.1.2'
+    compile group:  'io.appium', name: 'java-client', version: '5.0.2'
 }
 test {
-    systemProperty 'deviceName', System.properties['deviceName'] ?: ''
+    systemProperty 'deviceId', System.properties['deviceId'] ?: ''
     systemProperty 'androidVersion', System.properties['androidVersion'] ?: ''
     systemProperty 'port', System.properties['port'] ?: ''
     systemProperty 'apkPath', System.properties['apkPath'] ?: ''
@@ -29,7 +29,6 @@ test {
     systemProperty 'searchKeywords', System.properties['searchKeywords'] ?: ''
     systemProperty 'productTitle', System.properties['productTitle'] ?: ''
     systemProperty 'proceedToCheckout', System.properties['proceedToCheckout'] ?: ''
-    systemProperty 'appiumJSPath', System.properties['appiumJSPath'] ?: ''
     systemProperty 'humanTouch', System.properties['humanTouch'] ?: ''
     useTestNG()
 }

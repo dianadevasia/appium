@@ -1,6 +1,12 @@
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
@@ -15,9 +21,11 @@ public class AppiumActions {
 
     public void swipeUpElement( final int y2, final int y1 ) {
         try {
-            TouchAction touchAction = new TouchAction( driver );
-            touchAction.press( 0, y2 ).moveTo( 0, y1 ).release().perform();
-            Thread.sleep( 3000 );
+            int centerXofScreen = driver.manage().window().getSize().getWidth()/2;
+            int centerYofScreen = driver.manage().window().getSize().getHeight()/2;
+            new TouchAction(driver).press(centerXofScreen, centerYofScreen+200).waitAction( Duration.ofMillis( 2000))
+                    .moveTo(centerXofScreen, y1).release().perform();
+            Thread.sleep( 2000 );
         }
         catch ( NoSuchElementException ex ){
             ex.printStackTrace();
@@ -29,8 +37,12 @@ public class AppiumActions {
 
     public void toggleFilterButton(){
         try {
-            final WebElement closedFilterDropdown = driver.findElement( By.xpath( "//android.widget.TextView[contains(@resource-id,'rs_filter_header_label') and @text='Filter']" ) );
-            if ( closedFilterDropdown.isDisplayed() ) {
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 2)
+                    .pollingEvery(20, TimeUnit.MILLISECONDS)
+                    .ignoring(StaleElementReferenceException.class);
+
+            if ( wait.until( ExpectedConditions.presenceOfElementLocated( By.xpath( "//android.widget.TextView[contains(@resource-id,'rs_filter_header_label') and @text='Filter']" ) ) ).isDisplayed() ) {
+                final WebElement closedFilterDropdown = driver.findElement( By.xpath( "//android.widget.TextView[contains(@resource-id,'rs_filter_header_label') and @text='Filter']" ) );
                 closedFilterDropdown.click();
                 Thread.sleep( 5000 );
                 final WebElement openedFilterDropdown = driver.findElement( By.xpath( "//android.widget.Button[contains(@resource-id,'refinements_menu_accessibility_dismiss_button')]" ) );
@@ -44,9 +56,16 @@ public class AppiumActions {
 
     public void toggleElementAction( String type, String id) {
         try {
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 2)
+                    .pollingEvery(20, TimeUnit.MILLISECONDS)
+                    .ignoring(StaleElementReferenceException.class);
+
+            if(wait.until(
+                    ExpectedConditions.presenceOfElementLocated( By.xpath( "//" + type + "[contains(@resource-id,'" + id + "')]" ))
+            ).isDisplayed())
+            {
             final WebElement primeToggle = driver.findElement(
                     By.xpath( "//" + type + "[contains(@resource-id,'" + id + "')]" ) );
-            if ( primeToggle.isDisplayed() ) {
                 primeToggle.click();
                 Thread.sleep( 2000 );
                 primeToggle.click();

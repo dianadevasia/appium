@@ -1,8 +1,6 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -10,15 +8,18 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
+import io.appium.java_client.MobileElement;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.AndroidKeyCode;
+import io.appium.java_client.remote.AndroidMobileCapabilityType;
 import io.appium.java_client.remote.AutomationName;
 import io.appium.java_client.remote.MobileCapabilityType;
-import io.appium.java_client.service.local.AppiumDriverLocalService;
-import io.appium.java_client.service.local.AppiumServiceBuilder;
 
 public class appiumTest {
 
@@ -28,7 +29,6 @@ public class appiumTest {
 
     @Test
     public void checkoutProductFlow() {
-        startAppiumServer( System.getProperty( "port" ) );
         setUpDriver();
         appiumActions = new AppiumActions(driver);
         element = new AppiumElement( driver );
@@ -46,36 +46,30 @@ public class appiumTest {
     private void proceedToCheckout() {
         if(System.getProperty( "proceedToCheckout").equals( "true" )) {
             waitForElementToBePresentByIdAndThenClick( "action_bar_cart_image" );
-            waitForElementToBePresentByIdAndThenClick( "a-autoid-0-announce" );
+            clickProceedToCheckout();
         }
-    }
-
-    private void startAppiumServer( final String port ) {
-        AppiumDriverLocalService service = AppiumDriverLocalService.buildService(
-                new AppiumServiceBuilder()
-                        .withAppiumJS(new File(System.getProperty( "appiumJSPath" )))
-                        .withIPAddress("127.0.0.1")
-                        .usingPort(Integer.parseInt(port)));
-        service.start();
     }
 
     private void setUpDriver() {
         try {
             DesiredCapabilities capabilities = new DesiredCapabilities();
             capabilities.setCapability( CapabilityType.BROWSER_NAME, "Android" );
-            capabilities.setCapability( "platformName", "Android" );
-            capabilities.setCapability( MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM );
-            capabilities.setCapability( MobileCapabilityType.FULL_RESET, true );
+            capabilities.setCapability(MobileCapabilityType.PLATFORM_NAME, "ANDROID");
+            capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AutomationName.ANDROID_UIAUTOMATOR2);
+            capabilities.setCapability( MobileCapabilityType.FULL_RESET, System.getProperty("fullReset") );
 
-            capabilities.setCapability( CapabilityType.VERSION, System.getProperty("androidVersion" ) );
-            capabilities.setCapability( "deviceName", System.getProperty("deviceName" ) );
-            capabilities.setCapability( "app", System.getProperty("apkPath" ) );
+            capabilities.setCapability( MobileCapabilityType.PLATFORM_VERSION, System.getProperty("androidVersion" ) );
+            capabilities.setCapability( MobileCapabilityType.DEVICE_NAME, "Moto g" );
+            capabilities.setCapability(MobileCapabilityType.UDID, System.getProperty("deviceId" )  );
+            capabilities.setCapability( AndroidMobileCapabilityType.SYSTEM_PORT, 8203);
+            capabilities.setCapability( MobileCapabilityType.APP, System.getProperty("apkPath" ) );
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
             capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
+            capabilities.setCapability( "newCommandTimeout", "30" );
+            final String APPIUM_SERVER_URL = "http://0.0.0.0:4723/wd/hub";
+            driver = new AndroidDriver<MobileElement>( new URL(APPIUM_SERVER_URL), capabilities);
+            driver.manage().timeouts().implicitlyWait( 2, TimeUnit.MINUTES );
 
-            //        driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities) {};
-            driver = new AndroidDriver<>( new URL( "http://127.0.0.1:" + System.getProperty("port" ) + "/wd/hub" ), capabilities );
-            driver.manage().timeouts().implicitlyWait( 25, TimeUnit.SECONDS );
         } catch ( MalformedURLException e ){
             System.out.println( "Could not create the android driver" );
             e.printStackTrace();
@@ -85,20 +79,25 @@ public class appiumTest {
 
     private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
         try {
-            WebElement skipSignInButton = driver.findElement(
-                    By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" ) );
-            skipSignInButton.click();
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 10)
+                    .pollingEvery(20, TimeUnit.MILLISECONDS);
+            wait.until(
+                    ExpectedConditions.presenceOfElementLocated(
+                            By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" )))
+                    .click();
             final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
             final String parsedProductTitle = productTitle.replaceAll( "_", "" );
-            WebElement searchTextView = driver.findElement( By.xpath( "//android.widget.EditText" ) );
-            searchTextView.sendKeys( parsedSearchKeyword + "  \n" );
-            WebElement closeButton = driver.findElement( By.id( "tutorial_tool_tip_close_button" ) );
-            if ( closeButton.isDisplayed() ) {
-                closeButton.click();
+            wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).click();
+            Thread.sleep( 5000 );
+            wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).sendKeys( parsedSearchKeyword );
+            driver.pressKeyCode(AndroidKeyCode.ENTER);
+            if (wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "tutorial_tool_tip_close_button" ) )))
+                    .isDisplayed()) {
+                driver.findElement( By.id( "tutorial_tool_tip_close_button" ) ).click();
             }
             enableTouchActions();
             waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
-        } catch ( NoSuchElementException ex ){
+        } catch ( NoSuchElementException | InterruptedException ex ){
             ex.printStackTrace();
         }
     }
@@ -110,46 +109,41 @@ public class appiumTest {
         }
     }
 
-    private void scrollToViewReviews() {
-        if(System.getProperty( "humanTouch" ).equals( "true" )){
-            if( driver.findElements(By.xpath("//*[contains(@text,'Top reviews')]")).size()< 0) {
-                appiumActions.swipeUpElement( 700, 600);
-            }
-            final WebElement webElement =
-                    (WebElement) driver.findElements(By.xpath("//*[contains(@text,'Top reviews')]")).get( 0 );
-
-            int topYofWebElement = webElement.getLocation().getY();
-            int bottomYofWebElement = topYofWebElement + webElement.getSize().getHeight();
-            int centerXofWebElement = webElement.getLocation().getX() + (webElement.getSize().getWidth()/2);
-            for(int i=0; i< 17; i++)
-                new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
-            try {
-                Thread.sleep( 3000 );
-            } catch ( NoSuchElementException | InterruptedException e ) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private void addProductToCart() {
-        WebElement webElement =
-                driver.findElement( By.xpath("//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']"));
-        int topYofWebElement = webElement.getLocation().getY();
-        int bottomYofWebElement = topYofWebElement + webElement.getSize().getHeight();
-        int centerXofWebElement = webElement.getLocation().getX() + (webElement.getSize().getWidth()/2);
-        new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
-        new TouchAction(driver).press(centerXofWebElement, bottomYofWebElement-200).waitAction(10000).moveTo(0, centerXofWebElement).release().perform();
-        webElement.click();
         try {
-            Thread.sleep( 5000 );
-        } catch ( InterruptedException e ) {
+            Thread.sleep( 10000 );
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 40 )
+                    .pollingEvery( 40, TimeUnit.MILLISECONDS );
+            final By byAddToCart = By.xpath( "//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']" );
+            if ( wait.until( ExpectedConditions.presenceOfElementLocated( byAddToCart )).isDisplayed() ) {
+
+                int bottomYofScreen = driver.manage().window().getSize().getHeight();
+                int centerXofScreen = driver.manage().window().getSize().getWidth()/2;
+                new TouchAction( driver ).press( 0, bottomYofScreen - 200 )
+                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen ).release().perform();
+                new TouchAction( driver ).press( 0, bottomYofScreen - 200 )
+                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen ).release().perform();
+                try {
+                    Thread.sleep( 1000 );
+                    WebElement webElement = driver.findElement( byAddToCart );
+                    wait.until( ExpectedConditions.presenceOfElementLocated( byAddToCart )).isDisplayed();
+                    webElement.click();
+                } catch ( NoSuchElementException | InterruptedException e ) {
+                    System.out.print( "Add to cart button cant be clicked" );
+                    e.printStackTrace();
+                }
+            }
+        }catch ( NoSuchElementException |InterruptedException e ){
+            System.out.print( "Add to cart button not visible" );
             e.printStackTrace();
         }
     }
 
     private void waitForElementToBePresentByIdAndThenClick( String id) {
         try {
-            while (!element.isPresentById( id )){
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 40)
+                    .pollingEvery(40, TimeUnit.MILLISECONDS);
+            while(!( wait.until( ExpectedConditions.presenceOfElementLocated( By.id( id ) )).isDisplayed())) {
                 appiumActions.swipeUpElement( 700, 500);
             }
             final WebElement webElement = driver.findElement( By.id( id ));
@@ -163,62 +157,50 @@ public class appiumTest {
         }
     }
 
+    private void clickProceedToCheckout() {
+        try {
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 40)
+                    .pollingEvery(40, TimeUnit.MILLISECONDS);
+            final By byProceedToCheckout = By.xpath(
+                    "//android.widget.Button[contains(@resource-id,'a-autoid-0-announce') and @text='Proceed to Checkout']" );
+            while(!( wait.until( ExpectedConditions.presenceOfElementLocated(
+                    byProceedToCheckout ))
+                    .isDisplayed())) {
+                appiumActions.swipeUpElement( 700, 500);
+            }
+            final WebElement webElement = driver.findElement( byProceedToCheckout );
+            Thread.sleep( 5000 );
+            webElement.click();
+            System.out.print( "element found -- inside waitforElement" );
+        } catch ( NoSuchElementException ex ) {
+            appiumActions.swipeUpElement( 700, 500 );
+        } catch ( InterruptedException e ) {
+            e.printStackTrace();
+        }
+    }
+
     private void waitForElementToBePresentByTextAndThenClick( String text ) {
         try {
             int indexOfText = -1;
+            Thread.sleep( 5 );
             while ( (indexOfText = element.getIndexByText( text ))  == -1){
                 appiumActions.swipeUpElement( 700, 600);
             }
 
-            final WebElement webElement = (WebElement) driver.findElements(By.id( "item_title" )).get( indexOfText );
-            webElement.click();
-        } catch ( NoSuchElementException ex ) {
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 20)
+                    .pollingEvery(20, TimeUnit.MILLISECONDS);
+            if(wait.until(ExpectedConditions.presenceOfElementLocated( By.id( "item_title" ))).isDisplayed()) {
+                final WebElement webElement = (WebElement) driver.findElements( By.id( "item_title" ) ).get( indexOfText );
+                webElement.click();
+            }
+        } catch ( NoSuchElementException | InterruptedException ex ) {
             appiumActions.swipeUpElement( 700, 600);
         }
-    }
-
-    private static void runCommandAndWaitToComplete( String[] command ) {
-        String completeCommand = String.join(" ", command);
-        System.out.println("Executing command: " + completeCommand);
-        String line;
-        String returnValue = "";
-
-        try {
-            Process processCommand = Runtime.getRuntime().exec(command);
-            BufferedReader response = new BufferedReader(new InputStreamReader(processCommand.getInputStream()));
-
-            try {
-                processCommand.waitFor();
-            } catch (InterruptedException commandInterrupted) {
-                System.out.println("Were waiting for process to end but something interrupted it" + commandInterrupted.getMessage());
-            }
-
-            while ((line = response.readLine()) != null) {
-                returnValue = returnValue + line + "\n";
-            }
-            response.close();
-
-        } catch (Exception e) {
-            System.out.println("Unable to run command: " + completeCommand + ". Error: " + e.getMessage());
-        }
-        System.out.println("Response : runCMDAndWaitToComplete(" + completeCommand + ") : " + returnValue);
-    }
-
-    private static void stopAppiumServer(String port) {
-        System.out.println(String.format("Stopping Appium server on port %s", port));
-
-        // command to stop Appium service running on port --> sh -c lsof -P | grep ':4723' | awk '{print $2}' | xargs kill -9
-        String stopCommand[] = new String[]{"sh", "-c", String.format("lsof -P | grep ':%s' | awk '{print $2}' | xargs kill -9", port)};
-        runCommandAndWaitToComplete(stopCommand);
     }
 
     @AfterTest
     public void end() {
         driver.quit();
         System.out.println( "Stopped the driver" );
-        if(System.getProperty( "port" ) != null) {
-            stopAppiumServer( System.getProperty( "port" ) );
-            System.out.println( "Stopped the appium server" );
-        }
     }
 }
