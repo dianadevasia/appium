@@ -61,7 +61,7 @@ public class appiumTest {
             capabilities.setCapability( MobileCapabilityType.PLATFORM_VERSION, System.getProperty("androidVersion" ) );
             capabilities.setCapability( MobileCapabilityType.DEVICE_NAME, "Moto g" );
             capabilities.setCapability(MobileCapabilityType.UDID, System.getProperty("deviceId" )  );
-            capabilities.setCapability( AndroidMobileCapabilityType.SYSTEM_PORT, 8203);
+            capabilities.setCapability( AndroidMobileCapabilityType.SYSTEM_PORT, System.getProperty("port" ));
             capabilities.setCapability( MobileCapabilityType.APP, System.getProperty("apkPath" ) );
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
             capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
