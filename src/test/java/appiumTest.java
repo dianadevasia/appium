@@ -80,7 +80,7 @@ public class appiumTest {
     }
 
     private void findForProductInTheList( final String searchKeyword, final String productTitle ) throws TimeoutException {
-        WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 10 )
+        WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 20 )
                 .pollingEvery( 20, TimeUnit.MILLISECONDS );
         try {
             wait.until(
@@ -128,9 +128,9 @@ public class appiumTest {
                 int bottomYofScreen = driver.manage().window().getSize().getHeight();
                 int centerXofScreen = driver.manage().window().getSize().getWidth()/2;
                 new TouchAction( driver ).press( 0, bottomYofScreen - 200 )
-                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen ).release().perform();
+                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen+200 ).release().perform();
                 new TouchAction( driver ).press( 0, bottomYofScreen - 200 )
-                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen ).release().perform();
+                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen+200 ).release().perform();
                 try {
                     Thread.sleep( 1000 );
                     WebElement webElement = driver.findElement( byAddToCart );
