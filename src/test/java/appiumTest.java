@@ -56,19 +56,19 @@ public class appiumTest {
             capabilities.setCapability( CapabilityType.BROWSER_NAME, "Android" );
             capabilities.setCapability(MobileCapabilityType.PLATFORM_NAME, "ANDROID");
             capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AutomationName.ANDROID_UIAUTOMATOR2);
-            capabilities.setCapability( MobileCapabilityType.FULL_RESET, System.getProperty("fullReset") );
 
             capabilities.setCapability( MobileCapabilityType.PLATFORM_VERSION, System.getProperty("androidVersion" ) );
             capabilities.setCapability( MobileCapabilityType.DEVICE_NAME, "Moto g" );
             capabilities.setCapability(MobileCapabilityType.UDID, System.getProperty("deviceId" )  );
             capabilities.setCapability( AndroidMobileCapabilityType.SYSTEM_PORT, System.getProperty("port" ));
-            capabilities.setCapability( MobileCapabilityType.APP, System.getProperty("apkPath" ) );
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
             capabilities.setCapability( "appActivity", "com.amazon.mShop.home.HomeActivity" );
             capabilities.setCapability( "newCommandTimeout", "30" );
             final String APPIUM_SERVER_URL = "http://0.0.0.0:4723/wd/hub";
             driver = new AndroidDriver<MobileElement>( new URL(APPIUM_SERVER_URL), capabilities);
             driver.manage().timeouts().implicitlyWait( 2, TimeUnit.MINUTES );
+            if(System.getProperty("fullReset").equals( "true" ) )
+                driver.resetApp();
 
         } catch ( MalformedURLException e ){
             System.out.println( "Could not create the android driver" );
@@ -200,6 +200,7 @@ public class appiumTest {
 
     @AfterTest
     public void end() {
+        driver.resetApp();
         driver.quit();
         System.out.println( "Stopped the driver" );
     }
