@@ -44,10 +44,10 @@ public class AppiumActions {
             if ( wait.until( ExpectedConditions.presenceOfElementLocated( By.xpath( "//android.widget.TextView[contains(@resource-id,'rs_filter_header_label') and @text='Filter']" ) ) ).isDisplayed() ) {
                 final WebElement closedFilterDropdown = driver.findElement( By.xpath( "//android.widget.TextView[contains(@resource-id,'rs_filter_header_label') and @text='Filter']" ) );
                 closedFilterDropdown.click();
-                Thread.sleep( 5000 );
+                Thread.sleep( 2000 );
                 final WebElement openedFilterDropdown = driver.findElement( By.xpath( "//android.widget.Button[contains(@resource-id,'refinements_menu_accessibility_dismiss_button')]" ) );
                 openedFilterDropdown.click();
-                Thread.sleep( 2000 );
+                Thread.sleep( 1000 );
             }
         } catch ( NoSuchElementException | InterruptedException e ) {
             e.printStackTrace();

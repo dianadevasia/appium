@@ -80,28 +80,34 @@ public class appiumTest {
     }
 
     private void findForProductInTheList( final String searchKeyword, final String productTitle ) throws TimeoutException {
+        WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 10 )
+                .pollingEvery( 20, TimeUnit.MILLISECONDS );
         try {
-            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 10)
-                    .pollingEvery(20, TimeUnit.MILLISECONDS);
             wait.until(
                     ExpectedConditions.presenceOfElementLocated(
-                            By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" )))
-                    .click();
+                            By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" ) ) )
+            .click();
             final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
-            final String parsedProductTitle = productTitle.replaceAll( "[^0-9a-zA-Z]", "" );
-            wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).click();
+            wait.until( ExpectedConditions.presenceOfElementLocated( ( By.id( "rs_search_src_text" ) ) ) ).click();
             Thread.sleep( 5000 );
-            wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).sendKeys( parsedSearchKeyword );
-            driver.pressKeyCode(AndroidKeyCode.ENTER);
-            if (wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "tutorial_tool_tip_close_button" ) )))
-                    .isDisplayed()) {
-                driver.findElement( By.id( "tutorial_tool_tip_close_button" ) ).click();
-            }
-            enableTouchActions();
-            waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
+            wait.until( ExpectedConditions.presenceOfElementLocated( ( By.id( "rs_search_src_text" ) ) ) ).sendKeys(
+                    parsedSearchKeyword );
+            driver.pressKeyCode( AndroidKeyCode.ENTER );
         } catch ( NoSuchElementException | InterruptedException ex ){
             ex.printStackTrace();
         }
+        try {
+            if ( wait.until( ExpectedConditions.presenceOfElementLocated( ( By.id( "tutorial_tool_tip_close_button" ) ) ) )
+                    .isDisplayed() ) {
+                driver.findElement( By.id( "tutorial_tool_tip_close_button" ) ).click();
+                enableTouchActions();
+            }
+        } catch ( NoSuchElementException ex){
+            System.out.println("tool tip not present");
+        }
+        final String parsedProductTitle = productTitle.replaceAll( "[^0-9a-zA-Z]", "" );
+        waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
+
     }
 
     private void enableTouchActions() {
