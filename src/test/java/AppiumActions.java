@@ -23,9 +23,9 @@ public class AppiumActions {
         try {
             int centerXofScreen = driver.manage().window().getSize().getWidth()/2;
             int centerYofScreen = driver.manage().window().getSize().getHeight()/2;
-            new TouchAction(driver).press(centerXofScreen, centerYofScreen+200).waitAction( Duration.ofMillis( 2000))
+            new TouchAction(driver).press(centerXofScreen, centerYofScreen+200).waitAction( Duration.ofMillis( 1000))
                     .moveTo(centerXofScreen, y1).release().perform();
-            Thread.sleep( 2000 );
+            Thread.sleep( 500 );
         }
         catch ( NoSuchElementException ex ){
             ex.printStackTrace();
