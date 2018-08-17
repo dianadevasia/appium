@@ -24,7 +24,6 @@ test {
     systemProperty 'deviceId', System.properties['deviceId'] ?: ''
     systemProperty 'androidVersion', System.properties['androidVersion'] ?: ''
     systemProperty 'port', System.properties['port'] ?: ''
-    systemProperty 'apkPath', System.properties['apkPath'] ?: ''
     systemProperty 'fullReset', System.properties['fullReset'] ?: ''
     systemProperty 'searchKeywords', System.properties['searchKeywords'] ?: ''
     systemProperty 'productTitle', System.properties['productTitle'] ?: ''
