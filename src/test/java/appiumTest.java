@@ -1,7 +1,9 @@
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -28,7 +30,7 @@ public class appiumTest {
     private AppiumElement element;
 
     @Test
-    public void checkoutProductFlow() {
+    public void checkoutProductFlow() throws TimeoutException {
         setUpDriver();
         appiumActions = new AppiumActions(driver);
         element = new AppiumElement( driver );
@@ -58,7 +60,7 @@ public class appiumTest {
             capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AutomationName.ANDROID_UIAUTOMATOR2);
 
             capabilities.setCapability( MobileCapabilityType.PLATFORM_VERSION, System.getProperty("androidVersion" ) );
-            capabilities.setCapability( MobileCapabilityType.DEVICE_NAME, "Moto g" );
+            capabilities.setCapability( MobileCapabilityType.DEVICE_NAME, System.getProperty("deviceName" ) );
             capabilities.setCapability(MobileCapabilityType.UDID, System.getProperty("deviceId" )  );
             capabilities.setCapability( AndroidMobileCapabilityType.SYSTEM_PORT, System.getProperty("port" ));
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
@@ -77,29 +79,35 @@ public class appiumTest {
         }
     }
 
-    private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
+    private void findForProductInTheList( final String searchKeyword, final String productTitle ) throws TimeoutException {
+        WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 20 )
+                .pollingEvery( 20, TimeUnit.MILLISECONDS );
         try {
-            WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 10)
-                    .pollingEvery(20, TimeUnit.MILLISECONDS);
             wait.until(
                     ExpectedConditions.presenceOfElementLocated(
-                            By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" )))
-                    .click();
+                            By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" ) ) )
+            .click();
             final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
-            final String parsedProductTitle = productTitle.replaceAll( "_", "" );
-            wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).click();
+            wait.until( ExpectedConditions.presenceOfElementLocated( ( By.id( "rs_search_src_text" ) ) ) ).click();
             Thread.sleep( 5000 );
-            wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).sendKeys( parsedSearchKeyword );
-            driver.pressKeyCode(AndroidKeyCode.ENTER);
-            if (wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "tutorial_tool_tip_close_button" ) )))
-                    .isDisplayed()) {
-                driver.findElement( By.id( "tutorial_tool_tip_close_button" ) ).click();
-            }
-            enableTouchActions();
-            waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
+            wait.until( ExpectedConditions.presenceOfElementLocated( ( By.id( "rs_search_src_text" ) ) ) ).sendKeys(
+                    parsedSearchKeyword );
+            driver.pressKeyCode( AndroidKeyCode.ENTER );
         } catch ( NoSuchElementException | InterruptedException ex ){
             ex.printStackTrace();
         }
+        try {
+            if ( wait.until( ExpectedConditions.presenceOfElementLocated( ( By.id( "tutorial_tool_tip_close_button" ) ) ) )
+                    .isDisplayed() ) {
+                driver.findElement( By.id( "tutorial_tool_tip_close_button" ) ).click();
+                enableTouchActions();
+            }
+        } catch ( NoSuchElementException ex){
+            System.out.println("tool tip not present");
+        }
+        final String parsedProductTitle = productTitle.replaceAll( "[^0-9a-zA-Z]", "" );
+        waitForElementToBePresentByTextAndThenClick( parsedProductTitle );
+
     }
 
     private void enableTouchActions() {
@@ -112,17 +120,17 @@ public class appiumTest {
     private void addProductToCart() {
         try {
             Thread.sleep( 10000 );
-            WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 40 )
-                    .pollingEvery( 40, TimeUnit.MILLISECONDS );
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 20 )
+                    .pollingEvery( 20, TimeUnit.MILLISECONDS );
             final By byAddToCart = By.xpath( "//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']" );
             if ( wait.until( ExpectedConditions.presenceOfElementLocated( byAddToCart )).isDisplayed() ) {
 
                 int bottomYofScreen = driver.manage().window().getSize().getHeight();
                 int centerXofScreen = driver.manage().window().getSize().getWidth()/2;
                 new TouchAction( driver ).press( 0, bottomYofScreen - 200 )
-                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen ).release().perform();
+                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen+200 ).release().perform();
                 new TouchAction( driver ).press( 0, bottomYofScreen - 200 )
-                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen ).release().perform();
+                        .waitAction( Duration.ofMillis( 1000 ) ).moveTo( 0, centerXofScreen+200 ).release().perform();
                 try {
                     Thread.sleep( 1000 );
                     WebElement webElement = driver.findElement( byAddToCart );
@@ -179,12 +187,22 @@ public class appiumTest {
         }
     }
 
-    private void waitForElementToBePresentByTextAndThenClick( String text ) {
+    private void waitForElementToBePresentByTextAndThenClick( String text ) throws TimeoutException {
+        int timeOutValue = (Integer.parseInt( System.getProperty( "sessionTimeOutInterval" ) ))- 3;
+        long startTime = System.currentTimeMillis();
+        long elapsedTime;
         try {
-            int indexOfText = -1;
+            int indexOfText;
             Thread.sleep( 5 );
             while ( (indexOfText = element.getIndexByText( text ))  == -1){
-                appiumActions.swipeUpElement( 700, 600);
+                elapsedTime = (new Date()).getTime() - startTime;
+                if (elapsedTime < timeOutValue*60*1000) {
+                    appiumActions.swipeUpElement( 700, 600);
+                }
+                else{
+                    System.out.println( "session has timed out. exiting the test with failure status" );
+                    throw new TimeoutException( "session has timed out" );
+                }
             }
 
             WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 20)

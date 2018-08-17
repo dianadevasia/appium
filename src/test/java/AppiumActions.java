@@ -23,9 +23,9 @@ public class AppiumActions {
         try {
             int centerXofScreen = driver.manage().window().getSize().getWidth()/2;
             int centerYofScreen = driver.manage().window().getSize().getHeight()/2;
-            new TouchAction(driver).press(centerXofScreen, centerYofScreen+200).waitAction( Duration.ofMillis( 2000))
+            new TouchAction(driver).press(centerXofScreen, centerYofScreen+200).waitAction( Duration.ofMillis( 1000))
                     .moveTo(centerXofScreen, y1).release().perform();
-            Thread.sleep( 2000 );
+            Thread.sleep( 500 );
         }
         catch ( NoSuchElementException ex ){
             ex.printStackTrace();
@@ -44,10 +44,10 @@ public class AppiumActions {
             if ( wait.until( ExpectedConditions.presenceOfElementLocated( By.xpath( "//android.widget.TextView[contains(@resource-id,'rs_filter_header_label') and @text='Filter']" ) ) ).isDisplayed() ) {
                 final WebElement closedFilterDropdown = driver.findElement( By.xpath( "//android.widget.TextView[contains(@resource-id,'rs_filter_header_label') and @text='Filter']" ) );
                 closedFilterDropdown.click();
-                Thread.sleep( 5000 );
+                Thread.sleep( 2000 );
                 final WebElement openedFilterDropdown = driver.findElement( By.xpath( "//android.widget.Button[contains(@resource-id,'refinements_menu_accessibility_dismiss_button')]" ) );
                 openedFilterDropdown.click();
-                Thread.sleep( 2000 );
+                Thread.sleep( 1000 );
             }
         } catch ( NoSuchElementException | InterruptedException e ) {
             e.printStackTrace();

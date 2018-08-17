@@ -22,6 +22,7 @@ dependencies {
 }
 test {
     systemProperty 'deviceId', System.properties['deviceId'] ?: ''
+    systemProperty 'deviceName', System.properties['deviceName'] ?: ''
     systemProperty 'androidVersion', System.properties['androidVersion'] ?: ''
     systemProperty 'port', System.properties['port'] ?: ''
     systemProperty 'fullReset', System.properties['fullReset'] ?: ''
@@ -29,5 +30,6 @@ test {
     systemProperty 'productTitle', System.properties['productTitle'] ?: ''
     systemProperty 'proceedToCheckout', System.properties['proceedToCheckout'] ?: ''
     systemProperty 'humanTouch', System.properties['humanTouch'] ?: ''
+    systemProperty 'sessionTimeOutInterval', System.properties['sessionTimeOutInterval'] ?: ''
     useTestNG()
 }
