@@ -1,7 +1,9 @@
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -28,7 +30,7 @@ public class appiumTest {
     private AppiumElement element;
 
     @Test
-    public void checkoutProductFlow() {
+    public void checkoutProductFlow() throws TimeoutException {
         setUpDriver();
         appiumActions = new AppiumActions(driver);
         element = new AppiumElement( driver );
@@ -77,7 +79,7 @@ public class appiumTest {
         }
     }
 
-    private void findForProductInTheList( final String searchKeyword, final String productTitle ) {
+    private void findForProductInTheList( final String searchKeyword, final String productTitle ) throws TimeoutException {
         try {
             WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 10)
                     .pollingEvery(20, TimeUnit.MILLISECONDS);
@@ -112,8 +114,8 @@ public class appiumTest {
     private void addProductToCart() {
         try {
             Thread.sleep( 10000 );
-            WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 40 )
-                    .pollingEvery( 40, TimeUnit.MILLISECONDS );
+            WebDriverWait wait = (WebDriverWait) new WebDriverWait( driver, 20 )
+                    .pollingEvery( 20, TimeUnit.MILLISECONDS );
             final By byAddToCart = By.xpath( "//android.widget.Button[contains(@resource-id,'add-to-cart-button') and @text='Add to Basket']" );
             if ( wait.until( ExpectedConditions.presenceOfElementLocated( byAddToCart )).isDisplayed() ) {
 
@@ -179,12 +181,22 @@ public class appiumTest {
         }
     }
 
-    private void waitForElementToBePresentByTextAndThenClick( String text ) {
+    private void waitForElementToBePresentByTextAndThenClick( String text ) throws TimeoutException {
+        int timeOutValue = (Integer.parseInt( System.getProperty( "sessionTimeOutInterval" ) ))- 3;
+        long startTime = System.currentTimeMillis();
+        long elapsedTime;
         try {
-            int indexOfText = -1;
+            int indexOfText;
             Thread.sleep( 5 );
             while ( (indexOfText = element.getIndexByText( text ))  == -1){
-                appiumActions.swipeUpElement( 700, 600);
+                elapsedTime = (new Date()).getTime() - startTime;
+                if (elapsedTime < timeOutValue*60*1000) {
+                    appiumActions.swipeUpElement( 700, 600);
+                }
+                else{
+                    System.out.println( "session has timed out. exiting the test with failure status" );
+                    throw new TimeoutException( "session has timed out" );
+                }
             }
 
             WebDriverWait wait = (WebDriverWait) new WebDriverWait(driver, 20)

@@ -30,5 +30,6 @@ test {
     systemProperty 'productTitle', System.properties['productTitle'] ?: ''
     systemProperty 'proceedToCheckout', System.properties['proceedToCheckout'] ?: ''
     systemProperty 'humanTouch', System.properties['humanTouch'] ?: ''
+    systemProperty 'sessionTimeOutInterval', System.properties['sessionTimeOutInterval'] ?: ''
     useTestNG()
 }
