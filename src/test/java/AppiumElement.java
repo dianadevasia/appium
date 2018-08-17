@@ -30,7 +30,7 @@ public class AppiumElement {
                 for ( WebElement itemTitleElement : itemTitlesElement ) {
                     String titleText = itemTitleElement.getText();
                     titleText = titleText.replaceAll( "\\p{Pd}", "-" );
-                    String s = titleText.replaceAll( "[^-0-9a-zA-Z//(),.+']", "" );
+                    String s = titleText.replaceAll( "[^0-9a-zA-Z]", "" );
                     if ( s.equals( text ) )
                         return counter;
                     counter++;

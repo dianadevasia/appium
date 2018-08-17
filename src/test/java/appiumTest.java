@@ -58,7 +58,7 @@ public class appiumTest {
             capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AutomationName.ANDROID_UIAUTOMATOR2);
 
             capabilities.setCapability( MobileCapabilityType.PLATFORM_VERSION, System.getProperty("androidVersion" ) );
-            capabilities.setCapability( MobileCapabilityType.DEVICE_NAME, "Moto g" );
+            capabilities.setCapability( MobileCapabilityType.DEVICE_NAME, System.getProperty("deviceName" ) );
             capabilities.setCapability(MobileCapabilityType.UDID, System.getProperty("deviceId" )  );
             capabilities.setCapability( AndroidMobileCapabilityType.SYSTEM_PORT, System.getProperty("port" ));
             capabilities.setCapability( "appPackage", "com.amazon.mShop.android.shopping" );
@@ -86,7 +86,7 @@ public class appiumTest {
                             By.xpath( "//android.widget.Button[contains(@resource-id,'com.amazon.mShop.android.shopping:id/skip_sign_in_button') and @text='Skip sign in']" )))
                     .click();
             final String parsedSearchKeyword = searchKeyword.replaceAll( "_", " " );
-            final String parsedProductTitle = productTitle.replaceAll( "_", "" );
+            final String parsedProductTitle = productTitle.replaceAll( "[^0-9a-zA-Z]", "" );
             wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).click();
             Thread.sleep( 5000 );
             wait.until( ExpectedConditions.presenceOfElementLocated(( By.id( "rs_search_src_text" ) ))).sendKeys( parsedSearchKeyword );

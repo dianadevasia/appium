@@ -22,6 +22,7 @@ dependencies {
 }
 test {
     systemProperty 'deviceId', System.properties['deviceId'] ?: ''
+    systemProperty 'deviceName', System.properties['deviceName'] ?: ''
     systemProperty 'androidVersion', System.properties['androidVersion'] ?: ''
     systemProperty 'port', System.properties['port'] ?: ''
     systemProperty 'fullReset', System.properties['fullReset'] ?: ''
